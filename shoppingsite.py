@@ -4,9 +4,14 @@ Provides web interface for browsing melons, seeing detail about a melon, and
 put melons in a shopping cart.
 
 Authors: Joel Burton, Christian Fernandez, Meggie Mahnken, Katie Byers.
+
+how to generate a value for Flask.secret_key(or SECRET_KEY):
+
+python -c 'import secrets; print(secrets.token_hex())'
+'192b9bdd22ab9ed4d12e236c78afcb9a393ec15f71bbf5dc987d54727823bcbf'
 """
 
-from flask import Flask, render_template, redirect, flash
+from flask import Flask, render_template, redirect, flash, session
 import jinja2
 
 import melons
@@ -14,7 +19,7 @@ import melons
 app = Flask(__name__)
 
 # A secret key is needed to use Flask sessioning features
-app.secret_key = 'this-should-be-something-unguessable'
+app.secret_key = "af7c6ae755a466f76eee8efbe9c1a8eddfd3aa4307685c983cae6c51eccffc59"
 
 # Normally, if you refer to an undefined variable in a Jinja template,
 # Jinja silently ignores this. This makes debugging difficult, so we'll
@@ -68,14 +73,34 @@ def add_to_cart(melon_id):
 
     # The logic here should be something like:
     #
-    # - check if a "cart" exists in the session, and create one (an empty
-    #   dictionary keyed to the string "cart") if not
-    # - check if the desired melon id is the cart, and if not, put it in
+    # - check if a "cart" exists in the session, x
+    #  - if cart does not exist, create one (an empty dictionary keyed to the string "cart") x
+        #Remember: since the session is a magic dictionary, the cart is a key-value pair: session["cart"] = {}.
+
+    #dictionary_name.get(keyname, value) -> finding a key we aren't sure exists, if it doesn't exist None gets returned
+        #if value isn't given, make a default value
+
+        #if there is no key named "cart" then give us 0
+    if session.get("cart", 0) == 0:
+        #if it doesn't exist, we have an empty cart
+        session["cart"] = {}
+        #check the dictionary session, 
+        # look for the key "cart", if there is no value for that key, gives us a 0 (this allows us to manipulate) -> return 0 if the key "cart" doesn't exist 
+        
+
+    # - check if the desired melon id is in the cart, 
+    if session["cart"].get(melon_id, 0) == 0:
+        session["cart"][melon_id] = 1
+    else:
+        session["cart"][melon_id] += 1
+        #  and if not, put it in
     # - increment the count for that melon id by 1
     # - flash a success message
     # - redirect the user to the cart page
+    
+    print(f"this is our empty cart -> {session['cart']}")
 
-    return "Oops! This needs to be implemented!"
+    return
 
 
 @app.route("/cart")
